@@ -23,10 +23,8 @@ class HcloudCommand extends Command
 
     public function handle(GetOpt $getOpt): void
     {
-        var_dump($this->getOptions());
-
         $this->setApiKey(
-            $getOpt->getOption('api-token')
+            $getOpt->getOption('api-token') ?? getenv('HCLOUD_TOKEN')
         );
 
         $this->setHetznerAPIClient(

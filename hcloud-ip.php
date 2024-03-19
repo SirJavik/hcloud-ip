@@ -24,8 +24,10 @@ $getOpt->addOptions([
         ->setDescription('Show this help and quit'),
 
     Option::create(null, 'api-token', GetOpt::REQUIRED_ARGUMENT)
-        ->setDescription('Hetzner API token'),
-
+        ->setDescription('Hetzner API token')
+        ->setValidation(function ($value) {
+            return is_string($value);
+        }, 'api-token has to be an string'),
 ]);
 
 // add commands

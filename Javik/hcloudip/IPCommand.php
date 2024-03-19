@@ -3,6 +3,7 @@
 namespace Javik\hcloudip;
 
 use GetOpt\Operand;
+use Javik\hcloudip\Validator\isStringOrID;
 
 class IPCommand extends HcloudCommand
 {
@@ -11,7 +12,11 @@ class IPCommand extends HcloudCommand
         parent::__construct($name, $handler, $options);
 
         $this->addOperands([
-            Operand::create('ip', Operand::REQUIRED)->setDescription("Name of IP-Address to work with")
+            Operand::create('ip_nameOrId', Operand::REQUIRED)
+                ->setDescription("Name of IP-Address to work with")
+                ->setValidation(function ($value) {
+                    return new isStringOrID($value);
+                }, 'ip_nameOrId needs to be string or int'),
         ]);
 
     }
