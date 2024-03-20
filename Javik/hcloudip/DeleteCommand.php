@@ -3,6 +3,7 @@
 namespace Javik\hcloudip;
 
 use GetOpt\GetOpt;
+use LKDev\HetznerCloud\APIException;
 
 class DeleteCommand extends IPCommand
 {
@@ -20,5 +21,12 @@ class DeleteCommand extends IPCommand
     public function handle(GetOpt $getOpt): void
     {
         parent::handle($getOpt);
+
+        try {
+            $this->getHetznerAPIClient()->floatingIps()->get($getOpt->getOperand(0))->delete();
+        } catch (\Exception $e) {
+            print $e->getMessage() . PHP_EOL;
+            die(2);
+        }
     }
 }

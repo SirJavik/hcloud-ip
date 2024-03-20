@@ -9,8 +9,10 @@ use GetOpt\Option;
 
 require_once __DIR__ . '/vendor/autoload.php';
 
-define('NAME', basename(__FILE__));
-define('VERSION', NAME . '1.0-alpha');
+define('NAME', "hcloud-ip");
+define('AUTHOR', 'Benjamin Schneider');
+define('AUTHOR_MAIL', 'ich@benjamin-schneider.com');
+define('VERSION', '1.0.0');
 
 $getOpt = new GetOpt();
 
@@ -54,7 +56,8 @@ try {
 
 // show version and quit
 if ($getOpt->getOption('version')) {
-    echo sprintf('%s: %s' . PHP_EOL, NAME, VERSION);
+    printf('%s v%s' . PHP_EOL, NAME, VERSION);
+    printf('Written by %s <%s>' . PHP_EOL, AUTHOR, AUTHOR_MAIL);
     exit;
 }
 

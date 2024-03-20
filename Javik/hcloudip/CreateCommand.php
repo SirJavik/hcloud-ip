@@ -12,9 +12,9 @@ class CreateCommand extends IPCommand
 {
     private string $ipName;
     private string $type;
-    private string $ipDescription;
-    private Location $location;
-    private Server $server;
+    private string|null $ipDescription;
+    private Location|null $location;
+    private Server|null $server;
     private array $labels;
 
     public function getIpName(): string
@@ -47,22 +47,22 @@ class CreateCommand extends IPCommand
         $this->type = $type;
     }
 
-    public function getLocation(): Location
+    public function getLocation(): Location|null
     {
         return $this->location;
     }
 
-    public function setLocation(Location $location): void
+    public function setLocation(Location|null $location): void
     {
         $this->location = $location;
     }
 
-    public function getServer(): Server
+    public function getServer(): Server|null
     {
         return $this->server;
     }
 
-    public function setServer(Server $server): void
+    public function setServer(Server|null $server): void
     {
         $this->server = $server;
     }
@@ -88,7 +88,10 @@ class CreateCommand extends IPCommand
 
         $this->addOptions([
             Option::create('d', 'description', GetOpt::REQUIRED_ARGUMENT)
-                ->setDescription('Show this help and quit'),
+                ->setDescription('Show this help and quit')
+                ->setValidation(function ($value) {
+                    return is_string(($value));
+                }),
 
             Option::create('t', 'type', GetOpt::REQUIRED_ARGUMENT)
                 ->setDescription('Floating IP type')
@@ -99,8 +102,14 @@ class CreateCommand extends IPCommand
             Option::create('l', 'location', GetOpt::REQUIRED_ARGUMENT)
                 ->setDescription('Hetzner location')
                 ->setValidation(function ($value) {
-                    //return !is_null($this->getHetznerAPIClient()->locations()->get($value));
-                    return true;
+                    $locations = [
+                        "fsn1",
+                        "nbg1",
+                        "hel1",
+                        "ash",
+                        "hil"
+                    ];
+                    return in_array(strtolower($value), $locations);
                 }, 'Location has to be fsn1, nbg1, hel1, ash or hil'),
 
             Option::create('s', 'server', GetOpt::REQUIRED_ARGUMENT)
@@ -121,6 +130,8 @@ class CreateCommand extends IPCommand
     {
         parent::handle($getOpt);
 
+        if(is_null($getOpt->getOption('type')))
+            die("Type needs to be set" . PHP_EOL);
         $this->setType(
             $getOpt->getOption('type')
         );
@@ -129,22 +140,56 @@ class CreateCommand extends IPCommand
             $this->getOption('description') ?? null
         );
 
-        $this->setLocation(
-            $this->getHetznerAPIClient()->locations()->get(
-                $getOpt->getOption('location')
-            )
-        );
+        if(is_null($getOpt->getOption('location'))) {
+            $this->setLocation(null);
+        } else {
+            $this->setLocation(
+                $this->getHetznerAPIClient()->locations()->get(
+                    strtolower($getOpt->getOption('location'))
+                )
+            );
+        }
 
-        $this->setServer(
-            $this->getHetznerAPIClient()->servers()->get(
-                $getOpt->getOption('server')
-            )
-        );
+        if(is_null($getOpt->getOption('server'))) {
+            $this->setServer(null);
+        } else {
+            $this->setServer(
+                $this->getHetznerAPIClient()->servers()->get(
+                    $getOpt->getOption('server')
+                )
+            );
+        }
+
+        $labels = [];
+        if(!is_null($getOpt->getOption('labels'))) {
+            $labelsString = explode(",", $getOpt->getOption('labels'));
+
+            foreach ($labelsString as $str) {
+                $labelsArray = explode("=", $str);
+                $labels[$labelsArray[0]] = end($labelsArray);
+            }
+        }
+        $this->setLabels($labels);
 
         $this->setIpName(
             $getOpt->getOperand(0)
         );
 
-        $this->getHetznerAPIClient()->floatingIps()->create($this->getType(), $this->getIpDescription(), $this->getLocation(), $this->getServer(), $this->getIpName());
+        if(is_null($this->getServer()) and is_null($this->getLocation())) {
+            print "Ether Server or Location is needed to create a floating ip." . PHP_EOL;
+            die(2);
+        }
+
+        try {
+            $this->getHetznerAPIClient()->floatingIps()->create($this->getType(),
+                $this->getIpDescription(),
+                $this->getLocation(),
+                $this->getServer(),
+                $this->getIpName(),
+                $this->getLabels()
+            );
+        } catch (\Exception $e) {
+            print $e->getMessage();
+        }
     }
 }
