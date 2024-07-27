@@ -4,8 +4,8 @@ name: Build-Python
 on:
   # Triggers the workflow on push or pull request events but only for the "main" branch
   push:
-    tags:
-      - "v*"
+    branches:
+      - main
 
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
@@ -51,10 +51,10 @@ jobs:
             build/*.bin
             build/*.app/**/*
 
-      - uses: actions/checkout@v3
-      - name: Create a Release
-        uses: elgohr/Github-Release-Action@v5
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          title: MyReleaseMessage
+ #     - uses: actions/checkout@v3
+ #     - name: Create a Release
+ #       uses: elgohr/Github-Release-Action@v5
+ #       env:
+ #         GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+ #       with:
+ #         title: MyReleaseMessage
