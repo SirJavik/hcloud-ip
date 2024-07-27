@@ -1,0 +1,13 @@
+autopep8==2.3.1
+certifi==2024.7.4
+charset-normalizer==3.3.2
+hcloud==2.0.1
+idna==3.7
+Nuitka==2.3.11
+ordered-set==4.1.0
+pycodestyle==2.12.0
+python-dateutil==2.9.0.post0
+requests==2.32.3
+six==1.16.0
+urllib3==2.2.2
+zstandard==0.23.0
