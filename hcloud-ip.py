@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 ######################################
 #           _             _ _        #
 #          | |           (_) |       #
@@ -79,6 +80,10 @@ if __name__ == '__main__':
 
     if args.version:
         output_version()
+        sys.exit(0)
+
+    if len(sys.argv) <= 1:
+        arg_parser.print_help()
         sys.exit(0)
 
     # Stop at first existing config file
